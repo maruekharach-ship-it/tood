@@ -1,0 +1,332 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+local Mouse = LocalPlayer:GetMouse()
+
+-- สร้าง ScreenGui หลัก
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "ViolenceDistrict_Hub"
+ScreenGui.ResetOnSpawn = false
+
+local success, coregui = pcall(function() return CoreGui end)
+if success and coregui then
+    ScreenGui.Parent = coregui
+else
+    ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+end
+
+-- ปุ่มเปิด/ปิด UI (Toggle Floating Button)
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Name = "ToggleBtn"
+ToggleBtn.Size = UDim2.new(0, 50, 0, 50)
+ToggleBtn.Position = UDim2.new(0, 15, 0.4, 0)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+ToggleBtn.TextColor3 = Color3.fromRGB(0, 255, 150)
+ToggleBtn.Text = "MENU"
+ToggleBtn.Font = Enum.Font.SourceSansBold
+ToggleBtn.TextSize = 12
+ToggleBtn.Active = true
+ToggleBtn.Draggable = true
+ToggleBtn.Parent = ScreenGui
+
+local ToggleCorner = Instance.new("UICorner")
+ToggleCorner.CornerRadius = UDim.new(0, 25)
+ToggleCorner.Parent = ToggleBtn
+
+-- หน้าต่างหลัก (Main Frame)
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 320, 0, 420)
+MainFrame.Position = UDim2.new(0.2, 0, 0.2, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Parent = ScreenGui
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 12)
+MainCorner.Parent = MainFrame
+
+-- หัวข้อ HUB
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, -50, 0, 40)
+Title.Position = UDim2.new(0, 15, 0, 0)
+Title.BackgroundTransparency = 1
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Text = "⚡ VIOLENCE DISTRICT - HUB"
+Title.Font = Enum.Font.SourceSansBold
+Title.TextSize = 16
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = MainFrame
+
+-- ปุ่มย่อ/ปิด หน้าต่าง (-)
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 30, 0, 25)
+CloseBtn.Position = UDim2.new(1, -38, 0, 8)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.Text = "-"
+CloseBtn.Font = Enum.Font.SourceSansBold
+CloseBtn.TextSize = 18
+CloseBtn.Parent = MainFrame
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 6)
+CloseCorner.Parent = CloseBtn
+
+ToggleBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
+end)
+CloseBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
+end)
+
+-- Scrolling Frame สำหรับแบ่งหมวดหมู่เนื้อหาด้านใน
+local Container = Instance.new("ScrollingFrame")
+Container.Size = UDim2.new(0.92, 0, 0.84, 0)
+Container.Position = UDim2.new(0.04, 0, 0.13, 0)
+Container.BackgroundTransparency = 1
+Container.CanvasSize = UDim2.new(0, 0, 0, 650)
+Container.ScrollBarThickness = 4
+Container.Parent = MainFrame
+
+local UIList = Instance.new("UIListLayout")
+UIList.Parent = Container
+UIList.SortOrder = Enum.SortOrder.LayoutOrder
+UIList.Padding = UDim.new(0, 10)
+
+-- ฟังก์ชันสร้างหมวดหมู่ (Section Header)
+local function createCategory(text)
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(1, 0, 0, 25)
+    lbl.BackgroundTransparency = 1
+    lbl.TextColor3 = Color3.fromRGB(0, 200, 255)
+    lbl.Text = "📁 " .. text
+    lbl.Font = Enum.Font.SourceSansBold
+    lbl.TextSize = 15
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Parent = Container
+end
+
+-- ฟังก์ชันสร้างปุ่มกด (Toggle Button)
+local function createButton(text, parent)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, 0, 0, 38)
+    btn.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Text = text
+    btn.Font = Enum.Font.SourceSans
+    btn.TextSize = 14
+    btn.Parent = parent
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = btn
+    return btn
+end
+
+-- ฟังก์ชันสร้างช่องกรอกตัวเลข (Textbox Input)
+local function createTextBox(placeholder, parent)
+    local box = Instance.new("TextBox")
+    box.Size = UDim2.new(1, 0, 0, 35)
+    box.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+    box.TextColor3 = Color3.fromRGB(255, 255, 255)
+    box.PlaceholderText = placeholder
+    box.Text = ""
+    box.Font = Enum.Font.SourceSans
+    box.TextSize = 14
+    box.Parent = parent
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = box
+    return box
+end
+
+
+-- ======================================================
+-- 1. หมวดหมู่: ระบบล็อกเป้า (AIMBOT & FOV)
+-- ======================================================
+createCategory("ระบบล็อกเป้า (Aimbot & FOV)")
+
+local AimbotToggle = createButton("🎯 ล็อกเป้า (ฆาตกรและผู้เล่น): ปิด (OFF)", Container)
+local FovBox = createTextBox("กรอกขนาด FOV เช่น 120", Container)
+
+local aimbotActive = false
+local fovSize = 120
+
+AimbotToggle.MouseButton1Click:Connect(function()
+    aimbotActive = not aimbotActive
+    if aimbotActive then
+        AimbotToggle.Text = "🎯 ล็อกเป้า (ฆาตกรและผู้เล่น): เปิด (ON)"
+        AimbotToggle.BackgroundColor3 = Color3.fromRGB(40, 160, 80)
+    else
+        AimbotToggle.Text = "🎯 ล็อกเป้า (ฆาตกรและผู้เล่น): ปิด (OFF)"
+        AimbotToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+    end
+end)
+
+FovBox:GetPropertyChangedSignal("Text"):Connect(function()
+    local num = tonumber(FovBox.Text)
+    if num then fovSize = num end
+end)
+
+-- วาดวงกลม FOV สีรุ้ง (Rainbow)
+local fovCircle = Drawing.new("Circle")
+fovCircle.Thickness = 2
+fovCircle.Filled = false
+fovCircle.Visible = true
+
+RunService.RenderStepped:Connect(function()
+    fovCircle.Radius = fovSize
+    fovCircle.Position = Vector2.new(Mouse.X, Mouse.Y + 36)
+    
+    -- เอฟเฟกต์เปลี่ยนสีรุ้ง (RGB)
+    local hue = (tick() % 5) / 5
+    fovCircle.Color = Color3.fromHSV(hue, 1, 1)
+    fovCircle.Visible = aimbotActive
+    
+    -- ล็อกเป้าอัตโนมัติเมื่อเปิด
+    if aimbotActive then
+        local closestTarget = nil
+        local shortestDist = fovSize
+        
+        for _, plr in pairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
+                local head = plr.Character.Head
+                local screenPoint, onScreen = Camera:WorldToViewportPoint(head.Position)
+                if onScreen then
+                    local mouseDist = (Vector2.new(Mouse.X, Mouse.Y) - Vector2.new(screenPoint.X, screenPoint.Y)).Magnitude
+                    if mouseDist < shortestDist then
+                        shortestDist = mouseDist
+                        closestTarget = head
+                    end
+                end
+            end
+        end
+        
+        if closestTarget then
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, closestTarget.Position)
+        end
+    end
+end)
+
+
+-- ======================================================
+-- 2. หมวดหมู่: ระบบ ESP มองทะลุ (ESP)
+-- ======================================================
+createCategory("ระบบมองทะลุ (ESP)")
+
+local EspToggle = createButton("👁️ ESP ฆาตกร, ไม้สตั้น และผู้เล่น: ปิด (OFF)", Container)
+local espActive = false
+local highlights = {}
+
+local function clearESP()
+    for _, h in pairs(highlights) do if h then h:Destroy() end end
+    highlights = {}
+end
+
+EspToggle.MouseButton1Click:Connect(function()
+    espActive = not espActive
+    if espActive then
+        EspToggle.Text = "👁️ ESP ฆาตกร, ไม้สตั้น และผู้เล่น: เปิด (ON)"
+        EspToggle.BackgroundColor3 = Color3.fromRGB(40, 160, 80)
+    else
+        EspToggle.Text = "👁️ ESP ฆาตกร, ไม้สตั้น และผู้เล่น: ปิด (OFF)"
+        EspToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+        clearESP()
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    if not espActive then return end
+    clearESP()
+    
+    -- ESP ผู้เล่นและฆาตกร
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer and plr.Character then
+            local hl = Instance.new("Highlight")
+            hl.Adornee = plr.Character
+            hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            hl.FillColor = Color3.fromRGB(255, 50, 50)
+            hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+            hl.Parent = plr.Character
+            table.insert(highlights, hl)
+        end
+    end
+    
+    -- ESP ไม้ที่เอาไว้สตั้น (ค้นหาใน Workspace ตามชื่อที่เกี่ยวข้องกับ Bat/Wood/Stun)
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("Model") and (obj.Name:lower():find("bat") or obj.Name:lower():find("wood") or obj.Name:lower():find("stun") or obj.Name:lower():find("ไม้")) then
+            local hl = Instance.new("Highlight")
+            hl.Adornee = obj
+            hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            hl.FillColor = Color3.fromRGB(255, 255, 0) -- สีเหลืองสำหรับไม้สตั้น
+            hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+            hl.Parent = obj
+            table.insert(highlights, hl)
+        end
+    end
+end)
+
+
+-- ======================================================
+-- 3. หมวดหมู่: ตัวละครและการเคลื่อนไหว (Movement)
+-- ======================================================
+createCategory("ตัวละครและการเคลื่อนไหว")
+
+local SpeedToggle = createButton("⚡ เปิดใช้งานวิ่งเร็ว: ปิด (OFF)", Container)
+local SpeedBox = createTextBox("กรอกความเร็ว เช่น 25, 50", Container)
+
+local speedActive = false
+local customSpeed = 16
+
+SpeedToggle.MouseButton1Click:Connect(function()
+    speedActive = not speedActive
+    if speedActive then
+        SpeedToggle.Text = "⚡ เปิดใช้งานวิ่งเร็ว: เปิด (ON)"
+        SpeedToggle.BackgroundColor3 = Color3.fromRGB(40, 160, 80)
+    else
+        SpeedToggle.Text = "⚡ เปิดใช้งานวิ่งเร็ว: ปิด (OFF)"
+        SpeedToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+    end
+end)
+
+SpeedBox:GetPropertyChangedSignal("Text"):Connect(function()
+    local num = tonumber(SpeedBox.Text)
+    if num then customSpeed = num end
+end)
+
+RunService.RenderStepped:Connect(function()
+    if speedActive and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        LocalPlayer.Character.Humanoid.WalkSpeed = customSpeed
+    end
+end)
+
+-- ทะลุกำแพง (Noclip)
+local NoclipToggle = createButton("🧱 ทะลุกำแพง (Noclip): ปิด (OFF)", Container)
+local noclipActive = false
+
+NoclipToggle.MouseButton1Click:Connect(function()
+    noclipActive = not noclipActive
+    if noclipActive then
+        NoclipToggle.Text = "🧱 ทะลุกำแพง (Noclip): เปิด (ON)"
+        NoclipToggle.BackgroundColor3 = Color3.fromRGB(40, 160, 80)
+    else
+        NoclipToggle.Text = "🧱 ทะลุกำแพง (Noclip): ปิด (OFF)"
+        NoclipToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+    end
+end)
+
+RunService.Stepped:Connect(function()
+    if noclipActive and LocalPlayer.Character then
+        for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+    end
+end)
